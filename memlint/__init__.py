@@ -9,7 +9,7 @@ from memlint.models import (
 from memlint.classifier import classify_fact, classify_fact_async
 from memlint.utils import create_memory_metadata, confirm_fact, confirm_facts
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 __all__ = [
     "StaleDetector",
