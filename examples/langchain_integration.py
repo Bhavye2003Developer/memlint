@@ -26,7 +26,7 @@ if not LANGCHAIN_AVAILABLE:
 # --- Replace with real LangGraph node invocation in production ---
 sample_fact = {
     "id": "mem_001",
-    "content": "User works at PwC",
+    "content": "User works at Acme Corp",
     "created_at": "2024-09-01T00:00:00",
     "confirmation_count": 0,
     "source": "user",

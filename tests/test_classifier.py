@@ -30,7 +30,7 @@ def test_classifies_location():
 
 
 def test_classifies_employment():
-    assert classify_fact("User works at PwC as a consultant") == FactCategory.EMPLOYMENT
+    assert classify_fact("User works at Acme Corp as a consultant") == FactCategory.EMPLOYMENT
 
 
 def test_classifies_project():

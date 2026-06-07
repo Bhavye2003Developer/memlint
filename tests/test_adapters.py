@@ -49,7 +49,7 @@ def test_load_from_mem0_maps_fields():
     assert len(facts) == 1
     f = facts[0]
     assert f.id == "abc123"
-    assert f.content == "User works at PwC"
+    assert f.content == "User works at Acme Corp"
     assert f.confirmation_count == 0
     assert f.source == "user"
 

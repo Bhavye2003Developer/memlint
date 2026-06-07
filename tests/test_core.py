@@ -19,7 +19,7 @@ def test_check_returns_detection_report():
     detector = StaleDetector()
     facts = [
         _fact("f1", "User lives in Delhi", age_days=5),
-        _fact("f2", "User works at PwC", age_days=300),
+        _fact("f2", "User works at Acme Corp", age_days=300),
         _fact("f3", "User debugged a bug today", age_days=35),
     ]
     report = detector.check(facts, now=NOW)

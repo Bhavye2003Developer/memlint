@@ -52,9 +52,9 @@ def test_contradiction_detected():
 
 
 def test_agent_inferred_decays_faster():
-    user_fact  = _fact("f1", "User works at PwC", age_days=200,
+    user_fact  = _fact("f1", "User works at Acme Corp", age_days=200,
                        category=FactCategory.EMPLOYMENT, source="user")
-    agent_fact = _fact("f2", "User works at PwC", age_days=200,
+    agent_fact = _fact("f2", "User works at Acme Corp", age_days=200,
                        category=FactCategory.EMPLOYMENT, source="agent_inferred")
     score_user,  _, _ = compute_staleness_score(user_fact,  FactCategory.EMPLOYMENT, [user_fact],  NOW)
     score_agent, _, _ = compute_staleness_score(agent_fact, FactCategory.EMPLOYMENT, [agent_fact], NOW)
