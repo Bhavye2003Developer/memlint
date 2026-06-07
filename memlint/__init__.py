@@ -6,7 +6,9 @@ from memlint.models import (
     FactCategory,
     StalenessLevel,
 )
-from memlint.classifier import classify_fact_async
+from memlint.classifier import classify_fact, classify_fact_async
+
+__version__ = "0.1.0"
 
 __all__ = [
     "StaleDetector",
@@ -15,5 +17,7 @@ __all__ = [
     "DetectionReport",
     "FactCategory",
     "StalenessLevel",
+    "classify_fact",
     "classify_fact_async",
+    "__version__",
 ]

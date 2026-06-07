@@ -12,6 +12,23 @@ license = "MIT"
 authors = [
     { name = "Bhavye", email = "bhavyedevelopment2003@gmail.com" }
 ]
+keywords = [
+    "llm", "rag", "vector-database", "langchain", "langgraph", "mem0",
+    "agent", "memory", "staleness", "ai", "nlp", "pinecone", "qdrant",
+    "chroma", "weaviate", "pgvector", "memlint"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 dependencies = [
     "pydantic>=2.0",
     "python-dateutil>=2.8",

@@ -5,6 +5,7 @@ docs/superpowers/
 stale-detector-spec.md
 
 # Python
+dist/
 __pycache__/
 *.pyc
 *.pyo
