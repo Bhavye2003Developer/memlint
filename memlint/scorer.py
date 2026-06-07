@@ -143,12 +143,14 @@ def compute_staleness_score(
     category: FactCategory,
     all_facts: list[MemoryFact],
     now: datetime,
+    decay_rates: dict[FactCategory, float] | None = None,
 ) -> tuple[float, bool, str | None]:
     """Returns (score, has_contradiction, contradicted_by_id)."""
     reference_time = fact.last_confirmed_at or fact.created_at
     age_days = max((now - reference_time).days, 0)
 
-    decay_rate = DECAY_RATES[category]
+    rates = decay_rates if decay_rates is not None else DECAY_RATES
+    decay_rate = rates[category]
     score = age_days * decay_rate
 
     confirmation_reduction = min(fact.confirmation_count * 0.08, 0.40)

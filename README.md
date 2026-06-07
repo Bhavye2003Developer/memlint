@@ -16,6 +16,8 @@ Works with **RAG pipelines**, **vector databases** (Pinecone, Qdrant, Chroma, We
 - `create_memory_metadata`: generate timestamped metadata to store alongside your vectors at embedding time
 - `confirm_fact` / `confirm_facts`: reset the decay clock when a user re-states something
 - `report.enrich_metadata(docs)`: merge staleness scores back into your original docs, ready to upsert in one call
+- `detector.when_stale(fact)`: project when a fact will cross each threshold, for proactive refresh scheduling
+- Configurable decay rates per category, so you can tune lifespans to your use case
 - Semantic contradiction detection: flags `"User works at Acme"` as stale when `"User left Acme"` exists, even without shared keywords
 
 ## The problem
@@ -307,6 +309,50 @@ results = collection.query(
     where={"memlint_level": {"$nin": ["stale", "expired"]}},
 )
 ```
+
+## Configurable Decay Rates
+
+By default, `memlint` uses built-in decay rates per category. You can override any of them when creating a detector:
+
+```python
+from memlint import StaleDetector, FactCategory
+
+detector = StaleDetector(decay_rates={
+    FactCategory.EMPLOYMENT: 0.005,  # slower decay (default is 0.0025)
+    FactCategory.PROJECT: 0.010,     # faster decay (default is 0.006)
+})
+```
+
+Only the categories you specify are overridden. All others use the built-in defaults. Useful when your use case has different memory lifespans than the defaults (e.g., a platform where job changes happen more slowly, or project facts go stale faster).
+
+Default rates for reference:
+
+| Category       | Default rate | Typical half-life |
+|----------------|-------------|-------------------|
+| `identity`     | 0.0005      | ~1600 days        |
+| `location`     | 0.0020      | ~400 days         |
+| `employment`   | 0.0025      | ~320 days         |
+| `relationship` | 0.0025      | ~320 days         |
+| `preference`   | 0.0030      | ~270 days         |
+| `system_fact`  | 0.0100      | ~80 days          |
+| `project`      | 0.0060      | ~133 days         |
+| `episodic`     | 0.0500      | ~16 days          |
+
+## Decay Preview
+
+Find out when a fact will cross each staleness threshold, so you can schedule proactive memory refreshes:
+
+```python
+schedule = detector.when_stale(fact)
+print(schedule["aging"])    # datetime when score crosses 0.30
+print(schedule["stale"])    # datetime when score crosses 0.60
+print(schedule["expired"])  # datetime when score crosses 0.80
+
+# use it to decide when to schedule a refresh
+days_until_expired = (schedule["expired"] - fact.created_at).days
+```
+
+Dates in the past mean the threshold has already been crossed. The projection is based on current age and confirmation count and does not account for future confirmations or contradictions.
 
 ## Contributing
 

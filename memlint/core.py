@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from memlint.models import (
     FactCategory, MemoryFact, StalenessResult, DetectionReport, StalenessLevel,
 )
 from memlint.classifier import classify_fact, classify_fact_async
 from memlint.scorer import (
-    compute_staleness_score, determine_level, build_reason, build_recommendation,
+    DECAY_RATES, compute_staleness_score, determine_level, build_reason, build_recommendation,
 )
 
 
@@ -44,11 +44,13 @@ class StaleDetector:
         llm_provider: str = "openai",
         model: str = "gpt-4o-mini",
         llm=None,
+        decay_rates: dict[FactCategory, float] | None = None,
     ):
         self._use_llm = use_llm
         self._llm_provider = llm_provider
         self._model = model
         self._llm = llm
+        self._decay_rates = {**DECAY_RATES, **(decay_rates or {})}
 
     def _classify(self, fact: MemoryFact) -> FactCategory:
         if fact.category is not None:
@@ -80,7 +82,7 @@ class StaleDetector:
         all_facts = context_facts if context_facts is not None else [fact]
         category = self._classify(fact)
         score, has_contradiction, contradicted_by = compute_staleness_score(
-            fact, category, all_facts, now
+            fact, category, all_facts, now, self._decay_rates
         )
         level = determine_level(score)
         reference_time = fact.last_confirmed_at or fact.created_at
@@ -141,6 +143,50 @@ class StaleDetector:
         safe_ids = {r.fact_id for r in report.safe}
         return [f for f in facts if f.id in safe_ids]
 
+    def when_stale(
+        self,
+        fact: MemoryFact,
+        now: datetime | None = None,
+    ) -> dict[str, datetime]:
+        """Return when this fact will cross each staleness threshold.
+
+        Calculates the dates at which the fact's score will reach AGING (0.30),
+        STALE (0.60), and EXPIRED (0.80) based on current age, confirmation
+        history, and source. Dates in the past mean the threshold has already
+        been crossed.
+
+        Does not account for contradictions (unpredictable) or future
+        confirmations.
+
+        Args:
+            fact: The fact to project.
+            now: Reference time. Defaults to ``datetime.utcnow()``.
+
+        Returns:
+            Dict with keys ``"aging"``, ``"stale"``, ``"expired"`` mapped to
+            datetime objects.
+
+        Example::
+
+            schedule = detector.when_stale(fact)
+            print(schedule["expired"])  # datetime when fact becomes EXPIRED
+        """
+        if now is None:
+            now = datetime.utcnow()
+
+        category = self._classify(fact)
+        decay_rate = self._decay_rates[category]
+        reference_time = fact.last_confirmed_at or fact.created_at
+        confirmation_reduction = min(fact.confirmation_count * 0.08, 0.40)
+        multiplier = 1.3 if fact.source == "agent_inferred" else 1.0
+
+        schedule = {}
+        for level_name, threshold in (("aging", 0.30), ("stale", 0.60), ("expired", 0.80)):
+            days_needed = (threshold / multiplier + confirmation_reduction) / decay_rate
+            schedule[level_name] = reference_time + timedelta(days=days_needed)
+
+        return schedule
+
     async def _classify_async(self, fact: MemoryFact) -> FactCategory:
         if fact.category is not None:
             return fact.category
@@ -163,7 +209,7 @@ class StaleDetector:
         all_facts = context_facts if context_facts is not None else [fact]
         category = await self._classify_async(fact)
         score, has_contradiction, contradicted_by = compute_staleness_score(
-            fact, category, all_facts, now
+            fact, category, all_facts, now, self._decay_rates
         )
         level = determine_level(score)
         reference_time = fact.last_confirmed_at or fact.created_at

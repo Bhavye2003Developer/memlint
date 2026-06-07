@@ -80,3 +80,72 @@ def test_multiple_instantiation_no_side_effects():
     r1 = d1.check_one(fact, now=NOW)
     r2 = d2.check_one(fact, now=NOW)
     assert r1.staleness_score == r2.staleness_score
+
+
+# configurable decay rates
+
+def test_custom_decay_rate_lowers_score():
+    fact = _fact("f1", "User works at Acme", age_days=100, category=FactCategory.EMPLOYMENT)
+    default_score = StaleDetector().check_one(fact, now=NOW).staleness_score
+    slow_score = StaleDetector(decay_rates={FactCategory.EMPLOYMENT: 0.001}).check_one(fact, now=NOW).staleness_score
+    assert slow_score < default_score
+
+
+def test_custom_decay_rate_raises_score():
+    fact = _fact("f1", "User works at Acme", age_days=100, category=FactCategory.EMPLOYMENT)
+    default_score = StaleDetector().check_one(fact, now=NOW).staleness_score
+    fast_score = StaleDetector(decay_rates={FactCategory.EMPLOYMENT: 0.010}).check_one(fact, now=NOW).staleness_score
+    assert fast_score > default_score
+
+
+def test_custom_decay_rate_only_affects_specified_category():
+    location_fact = _fact("f1", "User lives in Delhi", age_days=100, category=FactCategory.LOCATION)
+    default_score = StaleDetector().check_one(location_fact, now=NOW).staleness_score
+    # override employment only, location should be unchanged
+    custom_score = StaleDetector(decay_rates={FactCategory.EMPLOYMENT: 0.001}).check_one(location_fact, now=NOW).staleness_score
+    assert custom_score == default_score
+
+
+def test_custom_decay_rate_no_global_mutation():
+    StaleDetector(decay_rates={FactCategory.EMPLOYMENT: 0.001})
+    fact = _fact("f1", "User works at Acme", age_days=100, category=FactCategory.EMPLOYMENT)
+    score_after = StaleDetector().check_one(fact, now=NOW).staleness_score
+    # default detector must still use original rate
+    from memlint.scorer import DECAY_RATES
+    expected = min(100 * DECAY_RATES[FactCategory.EMPLOYMENT], 1.0)
+    assert abs(score_after - expected) < 0.001
+
+
+# when_stale
+
+def test_when_stale_returns_three_keys():
+    fact = _fact("f1", "User works at Acme", age_days=0, category=FactCategory.EMPLOYMENT)
+    schedule = StaleDetector().when_stale(fact, now=NOW)
+    assert set(schedule.keys()) == {"aging", "stale", "expired"}
+
+
+def test_when_stale_dates_are_ordered():
+    fact = _fact("f1", "User works at Acme", age_days=0, category=FactCategory.EMPLOYMENT)
+    s = StaleDetector().when_stale(fact, now=NOW)
+    assert s["aging"] < s["stale"] < s["expired"]
+
+
+def test_when_stale_fresh_fact_all_future():
+    fact = _fact("f1", "User works at Acme", age_days=0, category=FactCategory.EMPLOYMENT)
+    s = StaleDetector().when_stale(fact, now=NOW)
+    assert s["aging"] > NOW
+    assert s["stale"] > NOW
+    assert s["expired"] > NOW
+
+
+def test_when_stale_already_expired_fact():
+    fact = _fact("f1", "User debugged a bug", age_days=60, category=FactCategory.EPISODIC)
+    s = StaleDetector().when_stale(fact, now=NOW)
+    assert s["expired"] < NOW
+
+
+def test_when_stale_respects_custom_decay_rates():
+    fact = _fact("f1", "User works at Acme", age_days=0, category=FactCategory.EMPLOYMENT)
+    s_default = StaleDetector().when_stale(fact, now=NOW)
+    s_slow = StaleDetector(decay_rates={FactCategory.EMPLOYMENT: 0.001}).when_stale(fact, now=NOW)
+    assert s_slow["aging"] > s_default["aging"]
