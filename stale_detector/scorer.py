@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from stale_detector.models import FactCategory, MemoryFact, StalenessLevel
 from stale_detector.classifier import CATEGORY_KEYWORDS
 
@@ -60,8 +60,8 @@ def _are_contradictory(
     ):
         return False
 
-    time_diff = abs((fact_a.created_at - fact_b.created_at).days)
-    if time_diff < 1:
+    time_diff = abs(fact_a.created_at - fact_b.created_at)
+    if time_diff < timedelta(days=1):
         return False
 
     keywords = CATEGORY_KEYWORDS.get(category, [])
