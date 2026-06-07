@@ -1,3 +1,4 @@
+from typing import Literal
 from memlint.models import FactCategory
 
 CATEGORY_KEYWORDS: dict[FactCategory, list[str]] = {
@@ -40,7 +41,7 @@ CATEGORY_KEYWORDS: dict[FactCategory, list[str]] = {
     ],
 }
 
-CLASSIFY_PROMPT = """You are classifying a memory fact into exactly one category.
+CLASSIFY_PROMPT = """Classify the following memory fact into exactly one category.
 
 Categories:
 - location: where someone lives, works, or is based
@@ -54,9 +55,12 @@ Categories:
 - unknown: does not fit any category
 
 Memory fact: "{fact}"
-
-Respond with ONLY the category name, nothing else. Example: "employment"
 """
+
+_CategoryLiteral = Literal[
+    "location", "employment", "project", "preference",
+    "relationship", "identity", "episodic", "system_fact", "unknown",
+]
 
 
 def _rule_based_classify(content: str) -> FactCategory:
@@ -71,27 +75,59 @@ def _rule_based_classify(content: str) -> FactCategory:
     return max(scores, key=lambda c: scores[c])
 
 
-def _llm_classify(content: str, llm_provider: str, model: str, llm=None) -> FactCategory:
-    if llm is None:
-        import os
-        from langchain_openai import ChatOpenAI
-        api_key = (
-            os.getenv("OPENAI_API_KEY") if llm_provider == "openai"
-            else os.getenv("ANTHROPIC_API_KEY")
-        )
-        if not api_key:
-            raise ValueError(f"No API key found for provider {llm_provider!r}")
-        llm = ChatOpenAI(model=model, temperature=0, api_key=api_key)
-
-    prompt = CLASSIFY_PROMPT.format(fact=content)
+def _build_llm(llm_provider: str, model: str):
     try:
-        from langchain_core.messages import HumanMessage
-        messages = [HumanMessage(content=prompt)]
+        from langchain.chat_models import init_chat_model
+        return init_chat_model(f"{llm_provider}:{model}", temperature=0)
     except ImportError:
-        messages = [{"role": "user", "content": prompt}]
+        pass
+    import os
+    from langchain_openai import ChatOpenAI
+    api_key = (
+        os.getenv("OPENAI_API_KEY") if llm_provider == "openai"
+        else os.getenv("ANTHROPIC_API_KEY")
+    )
+    if not api_key:
+        raise ValueError(f"No API key found for provider {llm_provider!r}")
+    return ChatOpenAI(model=model, temperature=0, api_key=api_key)
 
-    response = llm.invoke(messages)
-    raw = response.content.strip().lower()
+
+def _invoke_classify(llm, content: str) -> FactCategory:
+    from pydantic import BaseModel
+
+    class _Result(BaseModel):
+        category: _CategoryLiteral
+
+    messages = [{"role": "user", "content": CLASSIFY_PROMPT.format(fact=content)}]
+
+    if hasattr(llm, "with_structured_output"):
+        result = llm.with_structured_output(_Result).invoke(messages)
+        raw = result.category
+    else:
+        response = llm.invoke(messages)
+        raw = response.content.strip().lower()
+
+    try:
+        return FactCategory(raw)
+    except ValueError:
+        raise ValueError(f"LLM returned unrecognized category: {raw!r}")
+
+
+async def _invoke_classify_async(llm, content: str) -> FactCategory:
+    from pydantic import BaseModel
+
+    class _Result(BaseModel):
+        category: _CategoryLiteral
+
+    messages = [{"role": "user", "content": CLASSIFY_PROMPT.format(fact=content)}]
+
+    if hasattr(llm, "with_structured_output"):
+        result = await llm.with_structured_output(_Result).ainvoke(messages)
+        raw = result.category
+    else:
+        response = await llm.ainvoke(messages)
+        raw = response.content.strip().lower()
+
     try:
         return FactCategory(raw)
     except ValueError:
@@ -107,37 +143,12 @@ def classify_fact(
 ) -> FactCategory:
     if use_llm:
         try:
-            return _llm_classify(content, llm_provider, model, llm=llm)
+            if llm is None:
+                llm = _build_llm(llm_provider, model)
+            return _invoke_classify(llm, content)
         except Exception:
             pass
     return _rule_based_classify(content)
-
-
-async def _async_llm_classify(content: str, llm_provider: str, model: str, llm=None) -> FactCategory:
-    if llm is None:
-        import os
-        from langchain_openai import ChatOpenAI
-        api_key = (
-            os.getenv("OPENAI_API_KEY") if llm_provider == "openai"
-            else os.getenv("ANTHROPIC_API_KEY")
-        )
-        if not api_key:
-            raise ValueError(f"No API key found for provider {llm_provider!r}")
-        llm = ChatOpenAI(model=model, temperature=0, api_key=api_key)
-
-    prompt = CLASSIFY_PROMPT.format(fact=content)
-    try:
-        from langchain_core.messages import HumanMessage
-        messages = [HumanMessage(content=prompt)]
-    except ImportError:
-        messages = [{"role": "user", "content": prompt}]
-
-    response = await llm.ainvoke(messages)
-    raw = response.content.strip().lower()
-    try:
-        return FactCategory(raw)
-    except ValueError:
-        raise ValueError(f"LLM returned unrecognized category: {raw!r}")
 
 
 async def classify_fact_async(
@@ -149,7 +160,9 @@ async def classify_fact_async(
 ) -> FactCategory:
     if use_llm:
         try:
-            return await _async_llm_classify(content, llm_provider, model, llm=llm)
+            if llm is None:
+                llm = _build_llm(llm_provider, model)
+            return await _invoke_classify_async(llm, content)
         except Exception:
             pass
     return _rule_based_classify(content)

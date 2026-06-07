@@ -39,24 +39,29 @@ dependencies = [
 
 [project.optional-dependencies]
 llm = [
-    "langchain-core>=0.2",
-    "langchain-openai>=0.1",
+    "langchain-core>=0.3",
+    "langchain-openai>=0.2",
+    "langchain>=0.3",
 ]
 anthropic = [
-    "langchain-core>=0.2",
-    "langchain-anthropic>=0.2",
+    "langchain-core>=0.3",
+    "langchain-anthropic>=0.3",
+    "langchain>=0.3",
 ]
 nvidia = [
-    "langchain-core>=0.2",
-    "langchain-nvidia-ai-endpoints>=0.1",
+    "langchain-core>=0.3",
+    "langchain-nvidia-ai-endpoints>=0.3",
+    "langchain>=0.3",
 ]
 ollama = [
-    "langchain-core>=0.2",
-    "langchain-ollama>=0.1",
+    "langchain-core>=0.3",
+    "langchain-ollama>=0.3",
+    "langchain>=0.3",
 ]
 bedrock = [
-    "langchain-core>=0.2",
-    "langchain-aws>=0.1",
+    "langchain-core>=0.3",
+    "langchain-aws>=0.2",
+    "langchain>=0.3",
 ]
 dev = [
     "pytest>=8.0",
