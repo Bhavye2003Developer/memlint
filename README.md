@@ -6,6 +6,8 @@
 
 **Lint your LLM agent's memory before it lies to you.**
 
+![memlint demo](assets/demo.svg)
+
 `memlint` detects stale facts in an LLM agent's memory store before they are injected into the context window. It scores each fact by age, confirmation history, and contradiction signals, then tells you which ones to flag, refresh, or discard.
 
 Works with **RAG pipelines**, **vector databases** (Pinecone, Qdrant, Chroma, Weaviate, pgvector), **LangChain**, **LangGraph**, **Mem0**, and any agent framework that retrieves memory before prompting.
