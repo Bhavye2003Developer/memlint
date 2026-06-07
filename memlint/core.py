@@ -9,6 +9,35 @@ from memlint.scorer import (
 
 
 class StaleDetector:
+    """Detects stale facts in an LLM agent's memory store.
+
+    Scores each fact on a 0–1 scale based on age, confirmation history,
+    source reliability, and contradiction signals. Returns human-readable
+    recommendations for each fact.
+
+    Args:
+        use_llm: Enable LLM-assisted fact classification. Falls back to
+            rule-based classification if the LLM call fails.
+        llm_provider: Provider name used when ``use_llm=True`` and no
+            ``llm`` instance is passed. Either ``"openai"`` or ``"anthropic"``.
+        model: Model name passed to the auto-created LLM client when no
+            ``llm`` instance is provided.
+        llm: Pre-built LLM instance. Any object with an ``invoke(messages)``
+            method works — LangChain, NVIDIA NIM, Ollama, Bedrock, etc.
+            When provided, ``llm_provider`` and ``model`` are ignored.
+
+    Example::
+
+        detector = StaleDetector()
+        report = detector.check(facts)
+        safe = detector.filter_safe(facts)
+
+        # with a custom LLM backend
+        from langchain_nvidia_ai_endpoints import ChatNVIDIA
+        llm = ChatNVIDIA(model="meta/llama-3.1-70b-instruct")
+        detector = StaleDetector(use_llm=True, llm=llm)
+    """
+
     def __init__(
         self,
         use_llm: bool = False,
@@ -38,6 +67,14 @@ class StaleDetector:
         context_facts: list[MemoryFact] | None = None,
         now: datetime | None = None,
     ) -> StalenessResult:
+        """Score a single fact for staleness.
+
+        Args:
+            fact: The fact to evaluate.
+            context_facts: Other facts to check for contradictions against.
+                Defaults to just the fact itself.
+            now: Reference time for age calculation. Defaults to ``datetime.utcnow()``.
+        """
         if now is None:
             now = datetime.utcnow()
         all_facts = context_facts if context_facts is not None else [fact]
@@ -66,6 +103,13 @@ class StaleDetector:
         facts: list[MemoryFact],
         now: datetime | None = None,
     ) -> DetectionReport:
+        """Score a list of facts and return a full detection report.
+
+        Args:
+            facts: All facts to evaluate. Each fact is checked for
+                contradictions against the others.
+            now: Reference time. Defaults to ``datetime.utcnow()``.
+        """
         if now is None:
             now = datetime.utcnow()
         results = [self.check_one(f, context_facts=facts, now=now) for f in facts]
@@ -87,6 +131,12 @@ class StaleDetector:
         facts: list[MemoryFact],
         now: datetime | None = None,
     ) -> list[MemoryFact]:
+        """Return only FRESH and AGING facts — safe to inject into LLM context.
+
+        Args:
+            facts: Facts to filter.
+            now: Reference time. Defaults to ``datetime.utcnow()``.
+        """
         report = self.check(facts, now)
         safe_ids = {r.fact_id for r in report.safe}
         return [f for f in facts if f.id in safe_ids]

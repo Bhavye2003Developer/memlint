@@ -2,6 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/memlint.svg)](https://pypi.org/project/memlint/)
 [![Python](https://img.shields.io/pypi/pyversions/memlint.svg)](https://pypi.org/project/memlint/)
+[![CI](https://github.com/Bhavye2003Developer/memlint/actions/workflows/ci.yml/badge.svg)](https://github.com/Bhavye2003Developer/memlint/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Bhavye2003Developer/memlint/blob/main/LICENSE)
 
 **Lint your LLM agent's memory before it lies to you.**

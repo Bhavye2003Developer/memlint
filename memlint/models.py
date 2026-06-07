@@ -24,6 +24,19 @@ class StalenessLevel(str, Enum):
 
 
 class MemoryFact(BaseModel):
+    """A single memory fact stored in an LLM agent's memory store.
+
+    Attributes:
+        id: Unique identifier for this fact.
+        content: The plain-text content of the memory.
+        created_at: When this fact was first stored (timezone-naive UTC).
+        last_confirmed_at: Last time the fact was reconfirmed. Resets decay clock.
+        confirmation_count: How many times the fact has been reconfirmed.
+        category: Optional pre-assigned category. Skips classification if set.
+        source: Origin of the fact — ``"user"`` or ``"agent_inferred"``.
+            Agent-inferred facts receive a 1.3x staleness penalty.
+        metadata: Arbitrary extra data passed through unchanged.
+    """
     model_config = ConfigDict(use_enum_values=False)
 
     id: str
@@ -52,6 +65,11 @@ class StalenessResult(BaseModel):
 
 
 class DetectionReport(BaseModel):
+    """Full staleness report for a batch of memory facts.
+
+    Use ``flagged`` to get facts that should not be injected into context.
+    Use ``safe`` to get facts that are fresh enough to use.
+    """
     model_config = ConfigDict(use_enum_values=False)
 
     checked_at: datetime
@@ -64,10 +82,12 @@ class DetectionReport(BaseModel):
 
     @property
     def flagged(self) -> list[StalenessResult]:
+        """STALE and EXPIRED facts — do not inject these into LLM context."""
         return [r for r in self.results
                 if r.staleness_level in (StalenessLevel.STALE, StalenessLevel.EXPIRED)]
 
     @property
     def safe(self) -> list[StalenessResult]:
+        """FRESH and AGING facts — safe to inject into LLM context."""
         return [r for r in self.results
                 if r.staleness_level in (StalenessLevel.FRESH, StalenessLevel.AGING)]

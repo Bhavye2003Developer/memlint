@@ -42,6 +42,22 @@ llm = [
     "langchain-core>=0.2",
     "langchain-openai>=0.1",
 ]
+anthropic = [
+    "langchain-core>=0.2",
+    "langchain-anthropic>=0.2",
+]
+nvidia = [
+    "langchain-core>=0.2",
+    "langchain-nvidia-ai-endpoints>=0.1",
+]
+ollama = [
+    "langchain-core>=0.2",
+    "langchain-ollama>=0.1",
+]
+bedrock = [
+    "langchain-core>=0.2",
+    "langchain-aws>=0.1",
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov",
