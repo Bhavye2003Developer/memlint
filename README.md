@@ -139,6 +139,22 @@ Score thresholds:
 - `0.60 – 0.79` → **STALE** (flag before injecting)
 - `0.80 – 1.0` → **EXPIRED** (do not inject without reconfirmation)
 
+## LLM-assisted Classification (optional)
+
+By default `memlint` works fully offline. No LLM is ever called unless you explicitly enable it.
+
+The optional LLM path is used only for **fact classification**: deciding whether a fact is `employment`, `location`, `project`, etc. That category determines the decay rate. Rule-based keyword matching handles this well for most facts. The LLM improves accuracy on ambiguous ones.
+
+```python
+# default: fully offline, rule-based classification
+detector = StaleDetector()
+
+# optional: LLM-assisted classification
+detector = StaleDetector(use_llm=True, llm=your_llm)
+```
+
+Any object with `invoke()` / `ainvoke()` works as `llm`. If the LLM call fails for any reason, it silently falls back to rule-based classification.
+
 ## Adapters
 
 **JSON**: default format:
