@@ -96,3 +96,61 @@ def test_export_scores_values():
     assert isinstance(entry["memlint_score"], float)
     assert entry["memlint_level"] in ("fresh", "aging", "stale", "expired")
     assert isinstance(entry["memlint_age_days"], int)
+
+
+# enrich_metadata tests
+
+def test_enrich_metadata_adds_memlint_fields():
+    fact = _fact(30)
+    detector = StaleDetector()
+    report = detector.check([fact])
+    docs = [{"id": "f1", "text": "User works at Acme", "created_at": "2024-01-01"}]
+    enriched = report.enrich_metadata(docs)
+    assert len(enriched) == 1
+    assert "memlint_score" in enriched[0]
+    assert "memlint_level" in enriched[0]
+    assert "memlint_age_days" in enriched[0]
+    assert "memlint_checked_at" in enriched[0]
+
+
+def test_enrich_metadata_preserves_original_fields():
+    fact = _fact(30)
+    detector = StaleDetector()
+    report = detector.check([fact])
+    docs = [{"id": "f1", "text": "User works at Acme", "source": "user", "extra": "value"}]
+    enriched = report.enrich_metadata(docs)
+    assert enriched[0]["text"] == "User works at Acme"
+    assert enriched[0]["source"] == "user"
+    assert enriched[0]["extra"] == "value"
+
+
+def test_enrich_metadata_does_not_mutate_originals():
+    fact = _fact(30)
+    detector = StaleDetector()
+    report = detector.check([fact])
+    docs = [{"id": "f1", "text": "User works at Acme"}]
+    report.enrich_metadata(docs)
+    assert "memlint_score" not in docs[0]
+
+
+def test_enrich_metadata_unmatched_doc_passes_through():
+    fact = _fact(30)
+    detector = StaleDetector()
+    report = detector.check([fact])
+    docs = [
+        {"id": "f1", "text": "User works at Acme"},
+        {"id": "f_unknown", "text": "Some other fact"},
+    ]
+    enriched = report.enrich_metadata(docs)
+    assert len(enriched) == 2
+    assert "memlint_score" in enriched[0]
+    assert "memlint_score" not in enriched[1]
+
+
+def test_enrich_metadata_custom_id_key():
+    fact = _fact(30)
+    detector = StaleDetector()
+    report = detector.check([fact])
+    docs = [{"fact_id": "f1", "text": "User works at Acme"}]
+    enriched = report.enrich_metadata(docs, id_key="fact_id")
+    assert "memlint_score" in enriched[0]

@@ -208,16 +208,29 @@ for f in updated_facts:
 
 ## Exporting Scores Back to Your DB
 
-After running a check, write staleness scores back into your vector metadata so you can filter at query time:
+After running a check, enrich your original documents with staleness scores and upsert them back. One call, drop-in ready:
 
 ```python
 report = detector.check(facts)
 
-for entry in report.export_scores():
-    # entry has: fact_id, memlint_score, memlint_level, memlint_age_days, memlint_checked_at
-    collection.update(id=entry["fact_id"], metadata=entry)
+# merges memlint fields into your original docs, originals are not mutated
+enriched = report.enrich_metadata(original_docs)
+# enriched[0] = {"id": "mem_001", "text": "...", "created_at": "...",
+#                "memlint_score": 0.72, "memlint_level": "stale",
+#                "memlint_age_days": 120, "memlint_checked_at": "2026-06-07T..."}
 
-# next time, pre-filter at query level before even loading into Python
+collection.upsert(vectors=enriched)
+```
+
+If your docs use a different ID field, pass `id_key`:
+
+```python
+enriched = report.enrich_metadata(original_docs, id_key="fact_id")
+```
+
+Next time, pre-filter at query level before loading into Python:
+
+```python
 results = collection.query(
     query_texts=[user_query],
     where={"memlint_level": {"$nin": ["stale", "expired"]}},

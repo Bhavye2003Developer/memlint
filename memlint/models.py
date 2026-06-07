@@ -93,6 +93,45 @@ class DetectionReport(BaseModel):
         return [r for r in self.results
                 if r.staleness_level in (StalenessLevel.FRESH, StalenessLevel.AGING)]
 
+    def enrich_metadata(self, docs: list[dict], id_key: str = "id") -> list[dict]:
+        """Merge staleness scores into original metadata dicts.
+
+        Takes your original documents (as returned by any vector DB), matches
+        each one by ID, and returns copies with memlint fields added. Unmatched
+        docs are returned unchanged. Originals are never mutated.
+
+        Args:
+            docs: Original document dicts. Each must contain the ID field.
+            id_key: The dict key used for the document ID. Defaults to ``"id"``.
+
+        Returns:
+            Copies of the original dicts with ``memlint_score``, ``memlint_level``,
+            ``memlint_age_days``, and ``memlint_checked_at`` merged in.
+
+        Example::
+
+            report = detector.check(facts)
+            enriched = report.enrich_metadata(original_docs)
+            # enriched[0] = {original fields..., "memlint_score": 0.72, "memlint_level": "stale", ...}
+            collection.upsert(vectors=enriched)
+        """
+        scores_by_id = {r.fact_id: r for r in self.results}
+        enriched = []
+        for doc in docs:
+            doc_id = doc.get(id_key)
+            result = scores_by_id.get(doc_id)
+            if result is None:
+                enriched.append(dict(doc))
+            else:
+                enriched.append({
+                    **doc,
+                    "memlint_score": result.staleness_score,
+                    "memlint_level": result.staleness_level.value,
+                    "memlint_age_days": result.age_days,
+                    "memlint_checked_at": self.checked_at.isoformat(),
+                })
+        return enriched
+
     def export_scores(self) -> list[dict]:
         """Export staleness scores as metadata dicts ready to upsert back to your vector DB.
 
