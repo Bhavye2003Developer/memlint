@@ -44,17 +44,16 @@ With optional LLM-assisted classification:
 pip install memlint[llm]
 ```
 
-`memlint[llm]` installs `langchain-core` and `langchain-openai`. For other backends, install the relevant LangChain integration separately:
+`memlint[llm]` installs `langchain-core`, `langchain-openai`, and `langchain`. For other backends use the named extras:
 
 ```bash
-pip install langchain-anthropic      # Anthropic Claude
-pip install langchain-nvidia-ai-endpoints  # NVIDIA NIM
-pip install langchain-ollama         # Ollama (local models)
-pip install langchain-aws            # AWS Bedrock
-pip install langchain-google-vertexai  # Google Vertex AI
+pip install memlint[anthropic]   # Anthropic Claude
+pip install memlint[nvidia]      # NVIDIA NIM
+pip install memlint[ollama]      # Ollama (local models)
+pip install memlint[bedrock]     # AWS Bedrock
 ```
 
-Any object with an `invoke()` or `ainvoke()` method works. No LangChain dependency required.
+Or install any LangChain integration directly. Any object with an `invoke()` or `ainvoke()` method works. No LangChain dependency required for the core library.
 
 ## Quick Start
 
