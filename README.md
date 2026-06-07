@@ -80,6 +80,7 @@ enriched = report.enrich_metadata(retrieved_docs)
 collection.upsert(vectors=enriched)
 
 # 4. when a user re-states a fact, confirm it to reset its decay clock
+fact = facts[0]  # whichever fact the user re-stated
 updated = confirm_fact(fact)
 ```
 

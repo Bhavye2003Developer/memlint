@@ -12,17 +12,20 @@ def load_from_json(filepath: str) -> list[MemoryFact]:
 
     facts = []
     for i, entry in enumerate(data):
-        for required in ("id", "content", "created_at"):
+        for required in ("id", "content"):
             if required not in entry:
                 raise ValueError(f"Entry {i} missing required field '{required}'")
 
-        facts.append(MemoryFact(
-            id=entry["id"],
-            content=entry["content"],
-            created_at=parse_dt(entry["created_at"]),
-            last_confirmed_at=parse_dt(entry.get("last_confirmed_at")),
-            confirmation_count=entry.get("confirmation_count", 0),
-            source=entry.get("source", "user"),
-            metadata=entry.get("metadata", {}),
-        ))
+        kwargs: dict = {
+            "id": entry["id"],
+            "content": entry["content"],
+            "last_confirmed_at": parse_dt(entry.get("last_confirmed_at")),
+            "confirmation_count": entry.get("confirmation_count", 0),
+            "source": entry.get("source", "user"),
+            "metadata": entry.get("metadata", {}),
+        }
+        if "created_at" in entry:
+            kwargs["created_at"] = parse_dt(entry["created_at"])
+
+        facts.append(MemoryFact(**kwargs))
     return facts
