@@ -1,14 +1,14 @@
 # memlint
 
-## What this is
+**Lint your LLM agent's memory before it lies to you.**
 
-`memlint` is a Python library and CLI that detects stale facts in an LLM agent's memory store before they are injected into the context window. It classifies each memory fact by category, computes a 0–1 staleness score based on age, confirmation history, and contradiction signals, and returns a human-readable report with recommended actions.
+`memlint` detects stale facts in an LLM agent's memory store before they are injected into the context window. It scores each fact by age, confirmation history, and contradiction signals, then tells you which ones to flag, refresh, or discard.
 
-## The problem it solves
+## The problem
 
-When an LLM agent works across sessions, it relies on stored memory facts - things like where you live, where you work, or what tech stack your project uses. These facts go stale when the real world changes but the memory doesn't. For example: a fact stored as `"User works at xyz"` remains in memory even after you change jobs. The agent retrieves it, injects it, and responds confidently with wrong information, because no tool told it the fact was outdated.
+LLM agents that work across sessions store facts about the user and world - where they live, where they work, what they're building. These facts go stale when the real world changes but the memory doesn't. A fact like `"User works at xyz"` stays in memory after a job change. The agent retrieves it, injects it, and answers confidently with wrong information.
 
-`memlint` proactively identifies which specific memories are at risk before they are used.
+`memlint` catches this before it happens.
 
 ## Installation
 
