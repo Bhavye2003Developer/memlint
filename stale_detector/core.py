@@ -14,10 +14,12 @@ class StaleDetector:
         use_llm: bool = False,
         llm_provider: str = "openai",
         model: str = "gpt-4o-mini",
+        llm=None,
     ):
         self._use_llm = use_llm
         self._llm_provider = llm_provider
         self._model = model
+        self._llm = llm
 
     def _classify(self, fact: MemoryFact) -> FactCategory:
         if fact.category is not None:
@@ -27,6 +29,7 @@ class StaleDetector:
             use_llm=self._use_llm,
             llm_provider=self._llm_provider,
             model=self._model,
+            llm=self._llm,
         )
 
     def check_one(
