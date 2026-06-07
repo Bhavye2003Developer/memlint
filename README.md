@@ -6,7 +6,7 @@
 
 ## The problem it solves
 
-When an LLM agent works across sessions, it relies on stored memory facts — things like where you live, where you work, or what tech stack your project uses. These facts go stale when the real world changes but the memory doesn't. For example: a fact stored as `"User works at PwC"` remains in memory even after you change jobs. The agent retrieves it, injects it, and responds confidently with wrong information — because no tool told it the fact was outdated.
+When an LLM agent works across sessions, it relies on stored memory facts - things like where you live, where you work, or what tech stack your project uses. These facts go stale when the real world changes but the memory doesn't. For example: a fact stored as `"User works at xyz"` remains in memory even after you change jobs. The agent retrieves it, injects it, and responds confidently with wrong information, because no tool told it the fact was outdated.
 
 `stale-detector` proactively identifies which specific memories are at risk before they are used.
 
@@ -66,11 +66,11 @@ Sample output:
 ╭──────────┬────────────────────────────────────────┬────────────┬─────┬───────┬─────────┬─────────╮
 │ ID       │ Content                                │ Category   │ Age │ Score │ Level   │ Action  │
 ├──────────┼────────────────────────────────────────┼────────────┼─────┼───────┼─────────┼─────────┤
-│ mem_004  │ User works at PwC as a senior cons... │ employment │ 279 │  0.70 │ STALE   │ flag    │
-│ mem_006  │ User debugged a LangGraph memory is...│ episodic   │  29 │  1.00 │ EXPIRED │ discard │
+│ mem_004  │ User works at XYZ as a senior cons...  │ employment │ 279 │  0.70 │ STALE   │ flag    │
+│ mem_006  │ User debugged a LangGraph memory is... │ episodic   │  29 │  1.00 │ EXPIRED │ discard │
 ╰──────────┴────────────────────────────────────────┴────────────┴─────┴───────┴─────────┴─────────╯
 
-Checked 8 facts — 1 fresh, 2 aging, 3 stale, 2 expired
+Checked 8 facts: 1 fresh, 2 aging, 3 stale, 2 expired
 ```
 
 ## Staleness Score Explained
@@ -80,7 +80,7 @@ Each fact is assigned a category with a natural lifespan:
 | Category     | Examples                              | Typical Valid Window |
 |--------------|---------------------------------------|----------------------|
 | `location`   | "lives in Delhi", "office in Sector 5"| 6–24 months          |
-| `employment` | "works at PwC", "role is consultant"  | 6–18 months          |
+| `employment` | "works at xyz", "role is consultant"  | 6–18 months          |
 | `project`    | "building pract-agents", "using Pinecone" | 1–6 months       |
 | `preference` | "prefers Python", "uses dark mode"    | 3–12 months          |
 | `relationship`| "manager is X", "team has 5 people" | 3–12 months          |
@@ -96,19 +96,19 @@ Score thresholds:
 
 ## Adapters
 
-**JSON** — default format:
+**JSON**: default format:
 ```python
 from stale_detector.adapters.json_adapter import load_from_json
 facts = load_from_json("memories.json")
 ```
 
-**Mem0** — maps `memory` → `content`, `updated_at` → `last_confirmed_at`:
+**Mem0**: maps `memory` to `content`, `updated_at` to `last_confirmed_at`:
 ```python
 from stale_detector.adapters.mem0_adapter import load_from_mem0
 facts = load_from_mem0("mem0_export.json")
 ```
 
-**LangChain** — two tools: `check_memory_staleness` and `filter_stale_memories` (see below).
+**LangChain**: two tools: `check_memory_staleness` and `filter_stale_memories` (see below).
 
 ## LangChain / LangGraph Integration
 
@@ -118,7 +118,7 @@ from stale_detector.adapters.langchain_tool import (
     filter_stale_memories,
 )
 
-# In a LangGraph node — filter before injecting memories into the LLM
+# In a LangGraph node: filter before injecting memories into the LLM
 safe_facts_json = filter_stale_memories.invoke({"facts_json": memories_json_string})
 ```
 
