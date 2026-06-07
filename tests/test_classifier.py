@@ -1,5 +1,6 @@
+import asyncio
 from datetime import datetime
-from stale_detector.classifier import classify_fact
+from stale_detector.classifier import classify_fact, classify_fact_async
 from stale_detector.core import StaleDetector
 from stale_detector.models import FactCategory, MemoryFact
 
@@ -10,6 +11,13 @@ class _MockLLM:
         self._response = response
 
     def invoke(self, messages):
+        class _Resp:
+            pass
+        r = _Resp()
+        r.content = self._response
+        return r
+
+    async def ainvoke(self, messages):
         class _Resp:
             pass
         r = _Resp()
@@ -65,3 +73,43 @@ def test_stale_detector_accepts_llm_instance():
     fact = MemoryFact(id="f1", content="anything at all", created_at=datetime(2024, 1, 1))
     result = detector.check_one(fact)
     assert result.category == FactCategory.PROJECT
+
+
+def test_classify_fact_async_uses_ainvoke():
+    llm = _MockLLM("employment")
+    result = asyncio.run(classify_fact_async("anything at all", use_llm=True, llm=llm))
+    assert result == FactCategory.EMPLOYMENT
+
+
+def test_classify_fact_async_falls_back_on_bad_response():
+    llm = _MockLLM("not_a_real_category")
+    result = asyncio.run(classify_fact_async("User lives in Delhi", use_llm=True, llm=llm))
+    assert result == FactCategory.LOCATION
+
+
+def test_stale_detector_check_one_async():
+    llm = _MockLLM("project")
+    detector = StaleDetector(use_llm=True, llm=llm)
+    fact = MemoryFact(id="f1", content="anything at all", created_at=datetime(2024, 1, 1))
+    result = asyncio.run(detector.check_one_async(fact))
+    assert result.category == FactCategory.PROJECT
+
+
+def test_stale_detector_check_async():
+    llm = _MockLLM("location")
+    detector = StaleDetector(use_llm=True, llm=llm)
+    facts = [
+        MemoryFact(id="f1", content="a", created_at=datetime(2024, 1, 1)),
+        MemoryFact(id="f2", content="b", created_at=datetime(2024, 1, 1)),
+    ]
+    report = asyncio.run(detector.check_async(facts))
+    assert report.total_facts == 2
+    assert all(r.category == FactCategory.LOCATION for r in report.results)
+
+
+def test_stale_detector_filter_safe_async():
+    llm = _MockLLM("identity")
+    detector = StaleDetector(use_llm=True, llm=llm)
+    facts = [MemoryFact(id="f1", content="a", created_at=datetime(2025, 6, 1))]
+    safe = asyncio.run(detector.filter_safe_async(facts))
+    assert isinstance(safe, list)

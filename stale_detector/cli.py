@@ -71,7 +71,7 @@ def check(file: str, only_flagged: bool, output_json: bool, fmt: str):
 
     console.print(table)
     console.print(
-        f"\n[dim]Checked {report.total_facts} facts — "
+        f"\n[dim]Checked {report.total_facts} facts: "
         f"[green]{report.fresh_count} fresh[/], "
         f"[yellow]{report.aging_count} aging[/], "
         f"[red]{report.stale_count} stale[/], "

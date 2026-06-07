@@ -6,6 +6,7 @@ from stale_detector.models import (
     FactCategory,
     StalenessLevel,
 )
+from stale_detector.classifier import classify_fact_async
 
 __all__ = [
     "StaleDetector",
@@ -14,4 +15,5 @@ __all__ = [
     "DetectionReport",
     "FactCategory",
     "StalenessLevel",
+    "classify_fact_async",
 ]
