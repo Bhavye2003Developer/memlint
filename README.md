@@ -4,6 +4,8 @@
 
 `memlint` detects stale facts in an LLM agent's memory store before they are injected into the context window. It scores each fact by age, confirmation history, and contradiction signals, then tells you which ones to flag, refresh, or discard.
 
+Works with **RAG pipelines**, **vector databases** (Pinecone, Qdrant, Chroma, Weaviate, pgvector), **LangChain**, **LangGraph**, **Mem0**, and any agent framework that retrieves memory before prompting.
+
 ## The problem
 
 LLM agents that work across sessions store facts about the user and world - where they live, where they work, what they're building. These facts go stale when the real world changes but the memory doesn't. A fact like `"User works at xyz"` stays in memory after a job change. The agent retrieves it, injects it, and answers confidently with wrong information.
@@ -123,6 +125,40 @@ safe_facts_json = filter_stale_memories.invoke({"facts_json": memories_json_stri
 ```
 
 Requires `pip install memlint[llm]`.
+
+## RAG and Vector DB Integration
+
+Drop `memlint` between your vector DB retrieval step and context injection. Works with any store that returns documents with a timestamp in metadata.
+
+```python
+from memlint import StaleDetector, MemoryFact
+
+detector = StaleDetector()
+
+# retrieve from any vector DB (Pinecone, Qdrant, Chroma, Weaviate, pgvector...)
+results = collection.query(query_texts=[user_query], n_results=10)
+
+facts = [
+    MemoryFact(
+        id=doc["id"],
+        content=doc["text"],
+        created_at=doc["metadata"]["created_at"],
+    )
+    for doc in results
+]
+
+# only inject facts that are still fresh
+safe = detector.filter_safe(facts)
+context = "\n".join(f.content for f in safe)
+```
+
+Async version for async RAG chains:
+
+```python
+safe = await detector.filter_safe_async(facts)
+```
+
+Works with any LLM backend for optional classification: OpenAI, Anthropic, NVIDIA NIM, Ollama, AWS Bedrock, or any object with an `invoke()` / `ainvoke()` method.
 
 ## Contributing
 
