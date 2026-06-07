@@ -34,7 +34,7 @@ class MemoryFact(BaseModel):
         last_confirmed_at: Last time the fact was reconfirmed. Resets decay clock.
         confirmation_count: How many times the fact has been reconfirmed.
         category: Optional pre-assigned category. Skips classification if set.
-        source: Origin of the fact — ``"user"`` or ``"agent_inferred"``.
+        source: Origin of the fact, either ``"user"`` or ``"agent_inferred"``.
             Agent-inferred facts receive a 1.3x staleness penalty.
         metadata: Arbitrary extra data passed through unchanged.
     """
@@ -83,12 +83,12 @@ class DetectionReport(BaseModel):
 
     @property
     def flagged(self) -> list[StalenessResult]:
-        """STALE and EXPIRED facts — do not inject these into LLM context."""
+        """STALE and EXPIRED facts. Do not inject these into LLM context."""
         return [r for r in self.results
                 if r.staleness_level in (StalenessLevel.STALE, StalenessLevel.EXPIRED)]
 
     @property
     def safe(self) -> list[StalenessResult]:
-        """FRESH and AGING facts — safe to inject into LLM context."""
+        """FRESH and AGING facts, safe to inject into LLM context."""
         return [r for r in self.results
                 if r.staleness_level in (StalenessLevel.FRESH, StalenessLevel.AGING)]

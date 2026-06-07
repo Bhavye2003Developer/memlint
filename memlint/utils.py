@@ -25,16 +25,16 @@ def create_memory_metadata(
 
     Example::
 
-        # At embedding time — store this alongside your vector
+        # At embedding time, store this alongside your vector
         metadata = create_memory_metadata(created_at=datetime(2024, 6, 1))
         collection.upsert(id="mem_001", vector=embedding, metadata=metadata)
 
-        # At retrieval time — load directly into MemoryFact
+        # At retrieval time, load directly into MemoryFact
         fact = MemoryFact(id=doc["id"], content=doc["text"], **doc["metadata"])
     """
     if created_at is None:
         warnings.warn(
-            "created_at not provided — using current UTC time as fallback. "
+            "created_at not provided, using current UTC time as fallback. "
             "For accurate staleness scoring, pass the original creation timestamp.",
             UserWarning,
             stacklevel=2,

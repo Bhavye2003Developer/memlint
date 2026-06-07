@@ -23,7 +23,7 @@ class StaleDetector:
         model: Model name passed to the auto-created LLM client when no
             ``llm`` instance is provided.
         llm: Pre-built LLM instance. Any object with an ``invoke(messages)``
-            method works — LangChain, NVIDIA NIM, Ollama, Bedrock, etc.
+            method works (LangChain, NVIDIA NIM, Ollama, Bedrock, etc.).
             When provided, ``llm_provider`` and ``model`` are ignored.
 
     Example::
@@ -131,7 +131,7 @@ class StaleDetector:
         facts: list[MemoryFact],
         now: datetime | None = None,
     ) -> list[MemoryFact]:
-        """Return only FRESH and AGING facts — safe to inject into LLM context.
+        """Return only FRESH and AGING facts, safe to inject into LLM context.
 
         Args:
             facts: Facts to filter.

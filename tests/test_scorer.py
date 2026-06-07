@@ -87,7 +87,7 @@ def test_score_is_deterministic():
 
 
 def test_score_clamped_to_one():
-    # EPISODIC 365 days: 365 * 0.05 = 18.25 — must clamp to 1.0
+    # EPISODIC 365 days: 365 * 0.05 = 18.25, must clamp to 1.0
     fact = _fact("f1", "User fixed a bug today", age_days=365, category=FactCategory.EPISODIC)
     score, _, _ = compute_staleness_score(fact, FactCategory.EPISODIC, [fact], NOW)
     assert score == 1.0
