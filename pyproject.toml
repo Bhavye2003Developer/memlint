@@ -6,7 +6,12 @@ build-backend = "hatchling.build"
 name = "memlint"
 version = "0.1.0"
 description = "Detect stale facts in LLM agent memory stores"
+readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Bhavye", email = "bhavyedevelopment2003@gmail.com" }
+]
 dependencies = [
     "pydantic>=2.0",
     "python-dateutil>=2.8",
@@ -27,9 +32,6 @@ dev = [
 
 [project.scripts]
 memlint = "memlint.cli:main"
-
-license = "MIT"
-license-files = ["LICEN[CS]E*"]
 
 [project.urls]
 Homepage = "https://github.com/Bhavye2003Developer/memlint"
