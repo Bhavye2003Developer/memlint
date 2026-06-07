@@ -178,6 +178,14 @@ safe = await detector.filter_safe_async(facts)
 
 Works with any LLM backend for optional classification: OpenAI, Anthropic, NVIDIA NIM, Ollama, AWS Bedrock, or any object with an `invoke()` / `ainvoke()` method.
 
+## Why not just use recency ranking?
+
+Recency ranking softly downranks older memories at retrieval time. It does not tell you which specific facts are wrong or why. A 2-year-old identity fact (`"name is X"`) should stay; a 3-month-old employment fact (`"works at xyz"`) might already be wrong.
+
+`memlint` scores by **fact type**, not just age — because a location changes on a different timescale than a project dependency, which changes on a different timescale than a name. It also detects **contradictions** (two facts about the same topic where a newer one exists) and **confirmation signals** (facts the user has re-stated recently are less likely to be stale).
+
+Recency ranking is retrieval optimization. `memlint` is memory auditing. They solve different problems.
+
 ## Contributing
 
 Open an issue or pull request at https://github.com/Bhavye2003Developer/memlint. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
