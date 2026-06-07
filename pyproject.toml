@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stale-detector"
+version = "0.1.0"
+description = "Detect stale facts in LLM agent memory stores"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+    "python-dateutil>=2.8",
+    "click>=8.0",
+    "rich>=13.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+llm = [
+    "langchain-core>=0.2",
+    "langchain-openai>=0.1",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+]
+
+[project.scripts]
+stale-detector = "stale_detector.cli:main"
