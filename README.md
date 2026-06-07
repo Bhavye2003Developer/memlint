@@ -22,7 +22,7 @@ LLM agents that work across sessions store facts about the user and world - wher
 
 Recency ranking softly downranks older memories at retrieval time. It does not tell you which specific facts are wrong or why. A 2-year-old identity fact (`"name is X"`) should stay; a 3-month-old employment fact (`"works at xyz"`) might already be wrong.
 
-`memlint` scores by **fact type**, not just age — because a location changes on a different timescale than a project dependency, which changes on a different timescale than a name. It also detects **contradictions** (two facts about the same topic where a newer one exists) and **confirmation signals** (facts the user has re-stated recently are less likely to be stale).
+`memlint` scores by **fact type**, not just age, because a location changes on a different timescale than a project dependency, which changes on a different timescale than a name. It also detects **contradictions** (two facts about the same topic where a newer one exists) and **confirmation signals** (facts the user has re-stated recently are less likely to be stale).
 
 Recency ranking is retrieval optimization. `memlint` is memory auditing. They solve different problems.
 
@@ -48,7 +48,7 @@ pip install langchain-aws            # AWS Bedrock
 pip install langchain-google-vertexai  # Google Vertex AI
 ```
 
-Any object with an `invoke()` or `ainvoke()` method works — no LangChain dependency required.
+Any object with an `invoke()` or `ainvoke()` method works. No LangChain dependency required.
 
 ## Quick Start
 
