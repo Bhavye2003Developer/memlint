@@ -12,6 +12,11 @@
 
 Works with **RAG pipelines**, **vector databases** (Pinecone, Qdrant, Chroma, Weaviate, pgvector), **LangChain**, **LangGraph**, **Mem0**, and any agent framework that retrieves memory before prompting.
 
+**Three things it gives you:**
+- `create_memory_metadata`: generate timestamped metadata to store alongside your vectors at embedding time
+- `confirm_fact` / `confirm_facts`: reset the decay clock when a user re-states something
+- `report.enrich_metadata(docs)`: merge staleness scores back into your original docs, ready to upsert in one call
+
 ## The problem
 
 LLM agents that work across sessions store facts about the user and world - where they live, where they work, what they're building. These facts go stale when the real world changes but the memory doesn't. A fact like `"User works at xyz"` stays in memory after a job change. The agent retrieves it, injects it, and answers confidently with wrong information.
@@ -53,18 +58,30 @@ Any object with an `invoke()` or `ainvoke()` method works. No LangChain dependen
 ## Quick Start
 
 ```python
-from memlint import StaleDetector
-from memlint.adapters.json_adapter import load_from_json
+from datetime import datetime
+from memlint import StaleDetector, MemoryFact, create_memory_metadata, confirm_fact
 
-facts = load_from_json("sample_memories.json")
+# 1. at embedding time, generate metadata to store with your vector
+metadata = create_memory_metadata(created_at=datetime.utcnow())
+# returns: {"created_at": "...", "source": "user", "confirmation_count": 0}
+# store this in Pinecone, Qdrant, Chroma, JSON, anywhere
+
+# 2. at retrieval time, load into MemoryFact and check
+facts = [MemoryFact(id=doc["id"], content=doc["text"], **doc["metadata"]) for doc in retrieved_docs]
 detector = StaleDetector()
 report = detector.check(facts)
 
-print(f"Total: {report.total_facts} | Flagged: {len(report.flagged)}")
+print(f"Flagged: {len(report.flagged)} / {report.total_facts}")
 for result in report.flagged:
     print(f"  [{result.staleness_level.value.upper()}] {result.content}")
-    print(f"    Reason: {result.reason}")
-    print(f"    Action: {result.recommendation}")
+    print(f"  Reason: {result.reason}")
+
+# 3. write scores back into your DB in one call
+enriched = report.enrich_metadata(retrieved_docs)
+collection.upsert(vectors=enriched)
+
+# 4. when a user re-states a fact, confirm it to reset its decay clock
+updated = confirm_fact(fact)
 ```
 
 ## CLI Usage
