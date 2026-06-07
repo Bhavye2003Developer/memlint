@@ -8,7 +8,7 @@ from memlint.models import (
 )
 from memlint.classifier import classify_fact, classify_fact_async
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "StaleDetector",
