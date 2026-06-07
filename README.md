@@ -1,5 +1,10 @@
 # memlint
 
+[![PyPI version](https://img.shields.io/pypi/v/memlint.svg)](https://pypi.org/project/memlint/)
+[![Python](https://img.shields.io/pypi/pyversions/memlint.svg)](https://pypi.org/project/memlint/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Bhavye2003Developer/memlint/blob/main/LICENSE)
+[![PyPI downloads](https://img.shields.io/pypi/dm/memlint.svg)](https://pypi.org/project/memlint/)
+
 **Lint your LLM agent's memory before it lies to you.**
 
 `memlint` detects stale facts in an LLM agent's memory store before they are injected into the context window. It scores each fact by age, confirmation history, and contradiction signals, then tells you which ones to flag, refresh, or discard.
@@ -174,4 +179,10 @@ Works with any LLM backend for optional classification: OpenAI, Anthropic, NVIDI
 
 ## Contributing
 
-Open an issue or pull request at the project repository.
+Open an issue or pull request at https://github.com/Bhavye2003Developer/memlint. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+Copyright (c) 2026 MatrixEscaper
