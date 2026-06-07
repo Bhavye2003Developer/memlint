@@ -7,6 +7,7 @@ from memlint.models import (
     StalenessLevel,
 )
 from memlint.classifier import classify_fact, classify_fact_async
+from memlint.utils import create_memory_metadata
 
 __version__ = "0.1.2"
 
@@ -19,5 +20,6 @@ __all__ = [
     "StalenessLevel",
     "classify_fact",
     "classify_fact_async",
+    "create_memory_metadata",
     "__version__",
 ]

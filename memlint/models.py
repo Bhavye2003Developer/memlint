@@ -30,6 +30,7 @@ class MemoryFact(BaseModel):
         id: Unique identifier for this fact.
         content: The plain-text content of the memory.
         created_at: When this fact was first stored (timezone-naive UTC).
+            Defaults to current UTC time if not provided.
         last_confirmed_at: Last time the fact was reconfirmed. Resets decay clock.
         confirmation_count: How many times the fact has been reconfirmed.
         category: Optional pre-assigned category. Skips classification if set.
@@ -41,7 +42,7 @@ class MemoryFact(BaseModel):
 
     id: str
     content: str
-    created_at: datetime
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     last_confirmed_at: Optional[datetime] = None
     confirmation_count: int = 0
     category: Optional[FactCategory] = None
