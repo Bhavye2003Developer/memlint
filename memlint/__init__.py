@@ -1,12 +1,12 @@
-from stale_detector.core import StaleDetector
-from stale_detector.models import (
+from memlint.core import StaleDetector
+from memlint.models import (
     MemoryFact,
     StalenessResult,
     DetectionReport,
     FactCategory,
     StalenessLevel,
 )
-from stale_detector.classifier import classify_fact_async
+from memlint.classifier import classify_fact_async
 
 __all__ = [
     "StaleDetector",

@@ -6,10 +6,10 @@ from rich.table import Table
 from rich import box
 from rich.text import Text
 
-from stale_detector.core import StaleDetector
-from stale_detector.adapters.json_adapter import load_from_json
-from stale_detector.adapters.mem0_adapter import load_from_mem0
-from stale_detector.models import StalenessLevel
+from memlint.core import StaleDetector
+from memlint.adapters.json_adapter import load_from_json
+from memlint.adapters.mem0_adapter import load_from_mem0
+from memlint.models import StalenessLevel
 
 console = Console()
 

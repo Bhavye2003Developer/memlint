@@ -1,5 +1,5 @@
 import json
-from stale_detector.models import MemoryFact
+from memlint.models import MemoryFact
 
 try:
     from langchain_core.tools import tool
@@ -8,7 +8,7 @@ except ImportError:
     LANGCHAIN_AVAILABLE = False
 
 if LANGCHAIN_AVAILABLE:
-    from stale_detector.core import StaleDetector
+    from memlint.core import StaleDetector
 
     @tool
     def check_memory_staleness(fact_json: str) -> str:

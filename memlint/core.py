@@ -1,9 +1,9 @@
 from datetime import datetime
-from stale_detector.models import (
+from memlint.models import (
     FactCategory, MemoryFact, StalenessResult, DetectionReport, StalenessLevel,
 )
-from stale_detector.classifier import classify_fact, classify_fact_async
-from stale_detector.scorer import (
+from memlint.classifier import classify_fact, classify_fact_async
+from memlint.scorer import (
     compute_staleness_score, determine_level, build_reason, build_recommendation,
 )
 

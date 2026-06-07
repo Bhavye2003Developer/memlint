@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from stale_detector.models import FactCategory, MemoryFact, StalenessLevel
-from stale_detector.scorer import (
+from memlint.models import FactCategory, MemoryFact, StalenessLevel
+from memlint.scorer import (
     compute_staleness_score, determine_level, build_reason, build_recommendation,
 )
 

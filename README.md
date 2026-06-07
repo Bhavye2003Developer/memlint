@@ -1,32 +1,32 @@
-# stale-detector
+# memlint
 
 ## What this is
 
-`stale-detector` is a Python library and CLI that detects stale facts in an LLM agent's memory store before they are injected into the context window. It classifies each memory fact by category, computes a 0–1 staleness score based on age, confirmation history, and contradiction signals, and returns a human-readable report with recommended actions.
+`memlint` is a Python library and CLI that detects stale facts in an LLM agent's memory store before they are injected into the context window. It classifies each memory fact by category, computes a 0–1 staleness score based on age, confirmation history, and contradiction signals, and returns a human-readable report with recommended actions.
 
 ## The problem it solves
 
 When an LLM agent works across sessions, it relies on stored memory facts - things like where you live, where you work, or what tech stack your project uses. These facts go stale when the real world changes but the memory doesn't. For example: a fact stored as `"User works at xyz"` remains in memory even after you change jobs. The agent retrieves it, injects it, and responds confidently with wrong information, because no tool told it the fact was outdated.
 
-`stale-detector` proactively identifies which specific memories are at risk before they are used.
+`memlint` proactively identifies which specific memories are at risk before they are used.
 
 ## Installation
 
 ```bash
-pip install stale-detector
+pip install memlint
 ```
 
 With optional LLM-assisted classification:
 
 ```bash
-pip install stale-detector[llm]
+pip install memlint[llm]
 ```
 
 ## Quick Start
 
 ```python
-from stale_detector import StaleDetector
-from stale_detector.adapters.json_adapter import load_from_json
+from memlint import StaleDetector
+from memlint.adapters.json_adapter import load_from_json
 
 facts = load_from_json("sample_memories.json")
 detector = StaleDetector()
@@ -43,22 +43,22 @@ for result in report.flagged:
 
 Check all facts:
 ```bash
-stale-detector check memories.json
+memlint check memories.json
 ```
 
 Show only stale and expired:
 ```bash
-stale-detector check memories.json --only-flagged
+memlint check memories.json --only-flagged
 ```
 
 Output raw JSON:
 ```bash
-stale-detector check memories.json --json
+memlint check memories.json --json
 ```
 
 Parse Mem0 format:
 ```bash
-stale-detector check memories.json --format mem0
+memlint check memories.json --format mem0
 ```
 
 Sample output:
@@ -98,13 +98,13 @@ Score thresholds:
 
 **JSON**: default format:
 ```python
-from stale_detector.adapters.json_adapter import load_from_json
+from memlint.adapters.json_adapter import load_from_json
 facts = load_from_json("memories.json")
 ```
 
 **Mem0**: maps `memory` to `content`, `updated_at` to `last_confirmed_at`:
 ```python
-from stale_detector.adapters.mem0_adapter import load_from_mem0
+from memlint.adapters.mem0_adapter import load_from_mem0
 facts = load_from_mem0("mem0_export.json")
 ```
 
@@ -113,7 +113,7 @@ facts = load_from_mem0("mem0_export.json")
 ## LangChain / LangGraph Integration
 
 ```python
-from stale_detector.adapters.langchain_tool import (
+from memlint.adapters.langchain_tool import (
     check_memory_staleness,
     filter_stale_memories,
 )
@@ -122,7 +122,7 @@ from stale_detector.adapters.langchain_tool import (
 safe_facts_json = filter_stale_memories.invoke({"facts_json": memories_json_string})
 ```
 
-Requires `pip install stale-detector[llm]`.
+Requires `pip install memlint[llm]`.
 
 ## Contributing
 
