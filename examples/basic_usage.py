@@ -3,8 +3,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from stale_detector import StaleDetector
-from stale_detector.adapters.json_adapter import load_from_json
+from memlint import StaleDetector
+from memlint.adapters.json_adapter import load_from_json
 
 facts = load_from_json(os.path.join(os.path.dirname(__file__), "sample_memories.json"))
 detector = StaleDetector()

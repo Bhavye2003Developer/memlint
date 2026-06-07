@@ -1,9 +1,9 @@
 import json
 import os
 import pytest
-from stale_detector.adapters.json_adapter import load_from_json
-from stale_detector.adapters.mem0_adapter import load_from_mem0
-from stale_detector.models import MemoryFact
+from memlint.adapters.json_adapter import load_from_json
+from memlint.adapters.mem0_adapter import load_from_mem0
+from memlint.models import MemoryFact
 
 FIXTURES = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -63,5 +63,5 @@ def test_load_from_mem0_maps_updated_at_to_last_confirmed():
 
 
 def test_langchain_tool_importable_without_langchain():
-    from stale_detector.adapters import langchain_tool
+    from memlint.adapters import langchain_tool
     assert hasattr(langchain_tool, "LANGCHAIN_AVAILABLE")

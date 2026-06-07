@@ -1,6 +1,6 @@
 import json
-from stale_detector.adapters._utils import parse_dt
-from stale_detector.models import MemoryFact
+from memlint.adapters._utils import parse_dt
+from memlint.models import MemoryFact
 
 
 def load_from_json(filepath: str) -> list[MemoryFact]:

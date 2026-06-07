@@ -1,5 +1,5 @@
 from datetime import datetime
-from stale_detector.models import (
+from memlint.models import (
     FactCategory, StalenessLevel, MemoryFact, StalenessResult, DetectionReport,
 )
 

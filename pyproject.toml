@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "stale-detector"
+name = "memlint"
 version = "0.1.0"
 description = "Detect stale facts in LLM agent memory stores"
 requires-python = ">=3.11"
@@ -26,4 +26,4 @@ dev = [
 ]
 
 [project.scripts]
-stale-detector = "stale_detector.cli:main"
+memlint = "memlint.cli:main"

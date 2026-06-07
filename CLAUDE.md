@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`stale-detector` - Python library + CLI that detects stale facts in LLM agent memory stores before they are injected into context. Zero mandatory external services; works fully offline except for optional LLM classification.
+`memlint` - Python library + CLI that detects stale facts in LLM agent memory stores before they are injected into context. Zero mandatory external services; works fully offline except for optional LLM classification.
 
 ## Commands
 
@@ -22,13 +22,13 @@ pytest
 pytest tests/test_scorer.py
 
 # Run with coverage
-pytest --cov=stale_detector
+pytest --cov=memlint
 
 # Run CLI
-stale-detector check examples/sample_memories.json
-stale-detector check examples/sample_memories.json --only-flagged
-stale-detector check examples/sample_memories.json --json
-stale-detector check examples/sample_memories.json --format mem0
+memlint check examples/sample_memories.json
+memlint check examples/sample_memories.json --only-flagged
+memlint check examples/sample_memories.json --json
+memlint check examples/sample_memories.json --format mem0
 ```
 
 ## Architecture
@@ -37,14 +37,14 @@ stale-detector check examples/sample_memories.json --format mem0
 
 | File | Role |
 |------|------|
-| `stale_detector/models.py` | Pydantic v2 models: `MemoryFact`, `StalenessResult`, `DetectionReport`, enums |
-| `stale_detector/classifier.py` | Classifies fact text → `FactCategory` via keyword matching or optional LLM call |
-| `stale_detector/scorer.py` | Computes staleness score using decay rates, confirmation bonus, source penalty, contradiction detection |
-| `stale_detector/core.py` | `StaleDetector` class - orchestrates classify + score for `check()`, `check_one()`, `filter_safe()` |
-| `stale_detector/adapters/json_adapter.py` | Loads `MemoryFact` list from JSON file |
-| `stale_detector/adapters/mem0_adapter.py` | Loads from Mem0 format (`memory` → `content`, `updated_at` → `last_confirmed_at`) |
-| `stale_detector/adapters/langchain_tool.py` | Exposes `check_memory_staleness` and `filter_stale_memories` as LangChain tools (guarded import) |
-| `stale_detector/cli.py` | `click` + `rich` CLI; `stale-detector check <file>` |
+| `memlint/models.py` | Pydantic v2 models: `MemoryFact`, `StalenessResult`, `DetectionReport`, enums |
+| `memlint/classifier.py` | Classifies fact text → `FactCategory` via keyword matching or optional LLM call |
+| `memlint/scorer.py` | Computes staleness score using decay rates, confirmation bonus, source penalty, contradiction detection |
+| `memlint/core.py` | `StaleDetector` class - orchestrates classify + score for `check()`, `check_one()`, `filter_safe()` |
+| `memlint/adapters/json_adapter.py` | Loads `MemoryFact` list from JSON file |
+| `memlint/adapters/mem0_adapter.py` | Loads from Mem0 format (`memory` → `content`, `updated_at` → `last_confirmed_at`) |
+| `memlint/adapters/langchain_tool.py` | Exposes `check_memory_staleness` and `filter_stale_memories` as LangChain tools (guarded import) |
+| `memlint/cli.py` | `click` + `rich` CLI; `memlint check <file>` |
 
 ### Staleness score formula
 

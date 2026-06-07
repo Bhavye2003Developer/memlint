@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from stale_detector.models import FactCategory, MemoryFact, StalenessLevel
-from stale_detector.classifier import CATEGORY_KEYWORDS
+from memlint.models import FactCategory, MemoryFact, StalenessLevel
+from memlint.classifier import CATEGORY_KEYWORDS
 
 DECAY_RATES: dict[FactCategory, float] = {
     FactCategory.LOCATION:      0.0020,

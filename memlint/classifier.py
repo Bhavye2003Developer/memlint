@@ -1,4 +1,4 @@
-from stale_detector.models import FactCategory
+from memlint.models import FactCategory
 
 CATEGORY_KEYWORDS: dict[FactCategory, list[str]] = {
     FactCategory.LOCATION: [

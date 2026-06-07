@@ -1,8 +1,8 @@
 import asyncio
 from datetime import datetime
-from stale_detector.classifier import classify_fact, classify_fact_async
-from stale_detector.core import StaleDetector
-from stale_detector.models import FactCategory, MemoryFact
+from memlint.classifier import classify_fact, classify_fact_async
+from memlint.core import StaleDetector
+from memlint.models import FactCategory, MemoryFact
 
 
 class _MockLLM:
@@ -67,7 +67,7 @@ def test_classify_fact_llm_falls_back_on_bad_response():
     assert result == FactCategory.LOCATION
 
 
-def test_stale_detector_accepts_llm_instance():
+def test_memlint_accepts_llm_instance():
     llm = _MockLLM("project")
     detector = StaleDetector(use_llm=True, llm=llm)
     fact = MemoryFact(id="f1", content="anything at all", created_at=datetime(2024, 1, 1))
@@ -87,7 +87,7 @@ def test_classify_fact_async_falls_back_on_bad_response():
     assert result == FactCategory.LOCATION
 
 
-def test_stale_detector_check_one_async():
+def test_memlint_check_one_async():
     llm = _MockLLM("project")
     detector = StaleDetector(use_llm=True, llm=llm)
     fact = MemoryFact(id="f1", content="anything at all", created_at=datetime(2024, 1, 1))
@@ -95,7 +95,7 @@ def test_stale_detector_check_one_async():
     assert result.category == FactCategory.PROJECT
 
 
-def test_stale_detector_check_async():
+def test_memlint_check_async():
     llm = _MockLLM("location")
     detector = StaleDetector(use_llm=True, llm=llm)
     facts = [
@@ -107,7 +107,7 @@ def test_stale_detector_check_async():
     assert all(r.category == FactCategory.LOCATION for r in report.results)
 
 
-def test_stale_detector_filter_safe_async():
+def test_memlint_filter_safe_async():
     llm = _MockLLM("identity")
     detector = StaleDetector(use_llm=True, llm=llm)
     facts = [MemoryFact(id="f1", content="a", created_at=datetime(2025, 6, 1))]

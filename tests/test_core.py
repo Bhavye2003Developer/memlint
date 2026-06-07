@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from stale_detector.core import StaleDetector
-from stale_detector.models import FactCategory, MemoryFact, StalenessResult
+from memlint.core import StaleDetector
+from memlint.models import FactCategory, MemoryFact, StalenessResult
 
 NOW = datetime(2026, 6, 7)
 
