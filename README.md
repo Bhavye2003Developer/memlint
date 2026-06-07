@@ -12,10 +12,11 @@
 
 Works with **RAG pipelines**, **vector databases** (Pinecone, Qdrant, Chroma, Weaviate, pgvector), **LangChain**, **LangGraph**, **Mem0**, and any agent framework that retrieves memory before prompting.
 
-**Three things it gives you:**
+**What it gives you:**
 - `create_memory_metadata`: generate timestamped metadata to store alongside your vectors at embedding time
 - `confirm_fact` / `confirm_facts`: reset the decay clock when a user re-states something
 - `report.enrich_metadata(docs)`: merge staleness scores back into your original docs, ready to upsert in one call
+- Semantic contradiction detection: flags `"User works at Acme"` as stale when `"User left Acme"` exists, even without shared keywords
 
 ## The problem
 
@@ -138,6 +139,28 @@ Score thresholds:
 - `0.30 – 0.59` → **AGING** (use with caution)
 - `0.60 – 0.79` → **STALE** (flag before injecting)
 - `0.80 – 1.0` → **EXPIRED** (do not inject without reconfirmation)
+
+## Contradiction Detection
+
+`memlint` flags a fact as contradicted when a newer fact conflicts with it. No LLM needed.
+
+Two signals trigger contradiction:
+
+**1. Shared anchor keyword** (existing): both facts share a category keyword like `"works at"`, `"lives in"`, `"project"`.
+
+```
+"User works at Acme" + "User works at Google"  ->  older one flagged
+```
+
+**2. Negation or transition signal + shared entity** (semantic): one fact contains a negation word (`"left"`, `"quit"`, `"no longer"`, `"moved from"`, `"resigned"`) and both facts mention the same named entity.
+
+```
+"User works at Acme" + "User left Acme"     ->  flagged (negation + shared entity)
+"User lives in Delhi" + "User moved from Delhi to Mumbai"  ->  flagged
+"User is building with Pinecone" + "User migrated from Pinecone"  ->  flagged
+```
+
+A contradicted fact gets a +0.40 score penalty on top of its age-based score.
 
 ## LLM-assisted Classification (optional)
 
