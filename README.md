@@ -185,6 +185,22 @@ from memlint.adapters.json_adapter import load_from_json
 facts = load_from_json("memories.json")
 ```
 
+Expected JSON structure (`created_at` and all fields except `id` and `content` are optional):
+```json
+[
+  {
+    "id": "mem_001",
+    "content": "User works at Acme Corp",
+    "created_at": "2025-08-31T09:00:00",
+    "source": "user",
+    "confirmation_count": 0,
+    "last_confirmed_at": null
+  }
+]
+```
+
+If `created_at` is missing, it defaults to the current UTC time (facts without a timestamp are treated as brand new and will score FRESH).
+
 **Mem0**: maps `memory` to `content`, `updated_at` to `last_confirmed_at`:
 ```python
 from memlint.adapters.mem0_adapter import load_from_mem0
