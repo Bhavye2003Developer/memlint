@@ -1,0 +1,17 @@
+[
+  {
+    "id": "mem_001",
+    "content": "User lives in Delhi",
+    "created_at": "2024-08-15T10:00:00",
+    "last_confirmed_at": null,
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_002",
+    "content": "User prefers Python over JavaScript",
+    "created_at": "2025-01-10T08:30:00",
+    "confirmation_count": 2,
+    "source": "user"
+  }
+]
