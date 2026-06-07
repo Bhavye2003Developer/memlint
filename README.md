@@ -58,11 +58,10 @@ Or install any LangChain integration directly. Any object with an `invoke()` or 
 ## Quick Start
 
 ```python
-from datetime import datetime
 from memlint import StaleDetector, MemoryFact, create_memory_metadata, confirm_fact
 
 # 1. at embedding time, generate metadata to store with your vector
-metadata = create_memory_metadata(created_at=datetime.utcnow())
+metadata = create_memory_metadata(current_default=True)
 # returns: {"created_at": "...", "source": "user", "confirmation_count": 0}
 # store this in Pinecone, Qdrant, Chroma, JSON, anywhere
 
@@ -215,7 +214,7 @@ Drop `memlint` between your vector DB retrieval step and context injection. Work
 from memlint import StaleDetector, MemoryFact, create_memory_metadata
 
 # At embedding time, generate metadata and store it alongside your vector
-metadata = create_memory_metadata(created_at=datetime.utcnow())
+metadata = create_memory_metadata(current_default=True)
 collection.upsert(id="mem_001", vector=embedding, metadata=metadata)
 
 # At retrieval time, load directly into MemoryFact

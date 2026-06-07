@@ -60,3 +60,19 @@ def test_detector_works_without_created_at():
     detector = StaleDetector()
     result = detector.check_one(fact)
     assert result.staleness_score >= 0.0
+
+
+def test_create_memory_metadata_current_default_uses_now():
+    before = datetime.utcnow()
+    meta = create_memory_metadata(current_default=True)
+    after = datetime.utcnow()
+    parsed = datetime.fromisoformat(meta["created_at"])
+    assert before <= parsed <= after
+
+
+def test_create_memory_metadata_current_default_no_warning():
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        create_memory_metadata(current_default=True)
+        user_warnings = [x for x in w if issubclass(x.category, UserWarning)]
+        assert len(user_warnings) == 0
