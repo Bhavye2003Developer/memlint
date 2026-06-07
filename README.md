@@ -66,11 +66,11 @@ Sample output:
 ╭──────────┬────────────────────────────────────────┬────────────┬─────┬───────┬─────────┬─────────╮
 │ ID       │ Content                                │ Category   │ Age │ Score │ Level   │ Action  │
 ├──────────┼────────────────────────────────────────┼────────────┼─────┼───────┼─────────┼─────────┤
-│ mem_004  │ User works at PwC as a senior consu... │ employment │ 280 │  0.70 │ STALE   │ flag    │
-│ mem_006  │ User debugged a LangGraph memory iss...│ episodic   │  30 │  1.00 │ EXPIRED │ discard │
+│ mem_004  │ User works at PwC as a senior cons... │ employment │ 279 │  0.70 │ STALE   │ flag    │
+│ mem_006  │ User debugged a LangGraph memory is...│ episodic   │  29 │  1.00 │ EXPIRED │ discard │
 ╰──────────┴────────────────────────────────────────┴────────────┴─────┴───────┴─────────┴─────────╯
 
-Checked 8 facts — 1 fresh, 2 aging, 2 stale, 3 expired
+Checked 8 facts — 1 fresh, 2 aging, 3 stale, 2 expired
 ```
 
 ## Staleness Score Explained
