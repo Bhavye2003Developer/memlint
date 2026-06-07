@@ -1,18 +1,14 @@
 import json
-from datetime import datetime
-from dateutil import parser as dateutil_parser
+from stale_detector.adapters._utils import parse_dt
 from stale_detector.models import MemoryFact
-
-
-def _parse_dt(value: str | None) -> datetime | None:
-    if value is None:
-        return None
-    return dateutil_parser.parse(value).replace(tzinfo=None)
 
 
 def load_from_json(filepath: str) -> list[MemoryFact]:
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
+
+    if not isinstance(data, list):
+        raise ValueError(f"Expected a JSON array at root, got {type(data).__name__}")
 
     facts = []
     for i, entry in enumerate(data):
@@ -23,8 +19,8 @@ def load_from_json(filepath: str) -> list[MemoryFact]:
         facts.append(MemoryFact(
             id=entry["id"],
             content=entry["content"],
-            created_at=_parse_dt(entry["created_at"]),
-            last_confirmed_at=_parse_dt(entry.get("last_confirmed_at")),
+            created_at=parse_dt(entry["created_at"]),
+            last_confirmed_at=parse_dt(entry.get("last_confirmed_at")),
             confirmation_count=entry.get("confirmation_count", 0),
             source=entry.get("source", "user"),
             metadata=entry.get("metadata", {}),
