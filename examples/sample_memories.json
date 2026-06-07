@@ -1,0 +1,59 @@
+[
+  {
+    "id": "mem_001",
+    "content": "User prefers Python over JavaScript",
+    "created_at": "2026-05-20T09:00:00",
+    "last_confirmed_at": "2026-06-01T09:00:00",
+    "confirmation_count": 3,
+    "source": "user"
+  },
+  {
+    "id": "mem_002",
+    "content": "User prefers dark mode in all editors",
+    "created_at": "2026-01-28T10:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_003",
+    "content": "User is based in New Delhi for work",
+    "created_at": "2025-11-19T08:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_004",
+    "content": "User works at PwC as a senior consultant",
+    "created_at": "2025-08-31T09:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_005",
+    "content": "User is building pract-agents using LangGraph framework",
+    "created_at": "2026-02-07T11:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_006",
+    "content": "User debugged a LangGraph memory issue this morning",
+    "created_at": "2026-05-08T07:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_007",
+    "content": "User lives in Delhi",
+    "created_at": "2025-05-03T10:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  },
+  {
+    "id": "mem_008",
+    "content": "User lives in Mumbai now",
+    "created_at": "2026-04-18T10:00:00",
+    "confirmation_count": 0,
+    "source": "user"
+  }
+]
