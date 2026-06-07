@@ -1,5 +1,11 @@
+from __future__ import annotations
+
 import warnings
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from memlint.models import MemoryFact
 
 
 def create_memory_metadata(
@@ -46,3 +52,39 @@ def create_memory_metadata(
         "source": source,
         "confirmation_count": confirmation_count,
     }
+
+
+def confirm_fact(fact: MemoryFact, now: datetime | None = None) -> MemoryFact:
+    """Return a copy of the fact with confirmation count incremented and last_confirmed_at updated.
+
+    Does not mutate the original fact.
+
+    Args:
+        fact: The fact to confirm.
+        now: Timestamp to use as ``last_confirmed_at``. Defaults to ``datetime.utcnow()``.
+
+    Example::
+
+        updated = confirm_fact(fact)
+        # store updated fact back to your DB
+    """
+    if now is None:
+        now = datetime.utcnow()
+    return fact.model_copy(update={
+        "confirmation_count": fact.confirmation_count + 1,
+        "last_confirmed_at": now,
+    })
+
+
+def confirm_facts(facts: list[MemoryFact], now: datetime | None = None) -> list[MemoryFact]:
+    """Return a list of confirmed copies of the given facts.
+
+    Equivalent to calling ``confirm_fact`` on each fact. Does not mutate originals.
+
+    Args:
+        facts: Facts to confirm.
+        now: Shared timestamp for all confirmations. Defaults to ``datetime.utcnow()``.
+    """
+    if now is None:
+        now = datetime.utcnow()
+    return [confirm_fact(f, now) for f in facts]

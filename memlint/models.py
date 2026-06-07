@@ -92,3 +92,27 @@ class DetectionReport(BaseModel):
         """FRESH and AGING facts, safe to inject into LLM context."""
         return [r for r in self.results
                 if r.staleness_level in (StalenessLevel.FRESH, StalenessLevel.AGING)]
+
+    def export_scores(self) -> list[dict]:
+        """Export staleness scores as metadata dicts ready to upsert back to your vector DB.
+
+        Each dict contains ``fact_id``, ``memlint_score``, ``memlint_level``,
+        ``memlint_age_days``, and ``memlint_checked_at``. Merge these into your
+        existing metadata to keep staleness scores alongside your vectors.
+
+        Example::
+
+            report = detector.check(facts)
+            for entry in report.export_scores():
+                collection.update(id=entry["fact_id"], metadata=entry)
+        """
+        return [
+            {
+                "fact_id": r.fact_id,
+                "memlint_score": r.staleness_score,
+                "memlint_level": r.staleness_level.value,
+                "memlint_age_days": r.age_days,
+                "memlint_checked_at": self.checked_at.isoformat(),
+            }
+            for r in self.results
+        ]

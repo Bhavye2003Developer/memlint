@@ -157,19 +157,18 @@ Requires `pip install memlint[llm]`.
 Drop `memlint` between your vector DB retrieval step and context injection. Works with any store that returns documents with a timestamp in metadata.
 
 ```python
-from memlint import StaleDetector, MemoryFact
+from memlint import StaleDetector, MemoryFact, create_memory_metadata
 
+# At embedding time, generate metadata and store it alongside your vector
+metadata = create_memory_metadata(created_at=datetime.utcnow())
+collection.upsert(id="mem_001", vector=embedding, metadata=metadata)
+
+# At retrieval time, load directly into MemoryFact
 detector = StaleDetector()
-
-# retrieve from any vector DB (Pinecone, Qdrant, Chroma, Weaviate, pgvector...)
 results = collection.query(query_texts=[user_query], n_results=10)
 
 facts = [
-    MemoryFact(
-        id=doc["id"],
-        content=doc["text"],
-        created_at=doc["metadata"]["created_at"],
-    )
+    MemoryFact(id=doc["id"], content=doc["text"], **doc["metadata"])
     for doc in results
 ]
 
@@ -185,6 +184,45 @@ safe = await detector.filter_safe_async(facts)
 ```
 
 Works with any LLM backend for optional classification: OpenAI, Anthropic, NVIDIA NIM, Ollama, AWS Bedrock, or any object with an `invoke()` / `ainvoke()` method.
+
+## Reconfirming Facts
+
+When a user re-states a fact, confirm it to reset its decay clock:
+
+```python
+from memlint import confirm_fact, confirm_facts
+
+# single fact
+updated = confirm_fact(fact)
+
+# batch
+updated_facts = confirm_facts(facts)
+
+# store updated facts back to your DB
+for f in updated_facts:
+    collection.update(id=f.id, metadata={"confirmation_count": f.confirmation_count,
+                                          "last_confirmed_at": f.last_confirmed_at.isoformat()})
+```
+
+`confirm_fact` returns a new fact. It never mutates the original.
+
+## Exporting Scores Back to Your DB
+
+After running a check, write staleness scores back into your vector metadata so you can filter at query time:
+
+```python
+report = detector.check(facts)
+
+for entry in report.export_scores():
+    # entry has: fact_id, memlint_score, memlint_level, memlint_age_days, memlint_checked_at
+    collection.update(id=entry["fact_id"], metadata=entry)
+
+# next time, pre-filter at query level before even loading into Python
+results = collection.query(
+    query_texts=[user_query],
+    where={"memlint_level": {"$nin": ["stale", "expired"]}},
+)
+```
 
 ## Contributing
 
