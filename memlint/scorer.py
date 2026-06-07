@@ -14,6 +14,31 @@ DECAY_RATES: dict[FactCategory, float] = {
     FactCategory.UNKNOWN:       0.0030,
 }
 
+NEGATION_SIGNALS: list[str] = [
+    "no longer", "left ", "quit", "resigned", "moved out", "moved from",
+    "former ", "used to", "not anymore", "switched to", "stopped working",
+    "retired", "fired", "laid off", "ended", "closed down", "shut down",
+    "relocated from", "departed", "dropped out",
+]
+
+TRANSITION_KEYWORDS: dict[FactCategory, list[str]] = {
+    FactCategory.EMPLOYMENT: [
+        "left", "quit", "resigned", "fired", "laid off", "former", "moved on", "switched jobs",
+    ],
+    FactCategory.LOCATION: [
+        "moved", "relocated", "moved out", "moved from", "left",
+    ],
+    FactCategory.PROJECT: [
+        "dropped", "cancelled", "abandoned", "migrated from", "replaced", "deprecated", "switched from",
+    ],
+    FactCategory.PREFERENCE: [
+        "switched from", "no longer uses", "stopped using", "replaced",
+    ],
+    FactCategory.SYSTEM_FACT: [
+        "upgraded from", "migrated from", "replaced", "uninstalled", "switched from",
+    ],
+}
+
 
 def determine_level(score: float) -> StalenessLevel:
     if score < 0.30:
@@ -50,6 +75,28 @@ def build_recommendation(level: StalenessLevel) -> str:
     }[level]
 
 
+_COMMON_WORDS = {"user", "the", "this", "that", "they", "their", "has", "have", "had"}
+
+
+def _extract_proper_nouns(text: str) -> set[str]:
+    return {
+        w.strip('.,!?;"\'').lower()
+        for w in text.split()
+        if w and w[0].isupper() and len(w.strip('.,!?;"\'')) > 2
+        and w.strip('.,!?;"\'').lower() not in _COMMON_WORDS
+    }
+
+
+def _has_negation_signal(text: str) -> bool:
+    lower = text.lower()
+    return any(signal in lower for signal in NEGATION_SIGNALS)
+
+
+def _has_transition_keyword(text: str, category: FactCategory) -> bool:
+    lower = text.lower()
+    return any(kw in lower for kw in TRANSITION_KEYWORDS.get(category, []))
+
+
 def _are_contradictory(
     fact_a: MemoryFact,
     fact_b: MemoryFact,
@@ -64,10 +111,31 @@ def _are_contradictory(
     if time_diff < timedelta(days=1):
         return False
 
-    keywords = CATEGORY_KEYWORDS.get(category, [])
     a_lower = fact_a.content.lower()
     b_lower = fact_b.content.lower()
-    return any(kw in a_lower and kw in b_lower for kw in keywords)
+    keywords = CATEGORY_KEYWORDS.get(category, [])
+
+    # existing: shared anchor keyword
+    if any(kw in a_lower and kw in b_lower for kw in keywords):
+        return True
+
+    # semantic: shared proper noun + negation signal in either fact
+    a_entities = _extract_proper_nouns(fact_a.content)
+    b_entities = _extract_proper_nouns(fact_b.content)
+    shared_entities = a_entities & b_entities
+
+    if shared_entities:
+        if _has_negation_signal(a_lower) or _has_negation_signal(b_lower):
+            return True
+        # transition keyword in one fact + anchor keyword in the other
+        a_has_anchor = any(kw in a_lower for kw in keywords)
+        b_has_anchor = any(kw in b_lower for kw in keywords)
+        a_has_transition = _has_transition_keyword(a_lower, category)
+        b_has_transition = _has_transition_keyword(b_lower, category)
+        if (a_has_anchor and b_has_transition) or (b_has_anchor and a_has_transition):
+            return True
+
+    return False
 
 
 def compute_staleness_score(
